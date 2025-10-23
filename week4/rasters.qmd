@@ -294,6 +294,15 @@ zion_elevation_clip <- zion_elevation[clip, drop = FALSE]
 ```
 
 ```{r}
+map1<- tm_shape(zion_elevation) +
+tm_raster(col.legend = tm_legend(title = "Elevation (m)")) +
+tm_title(text = "Original")
+
+map2<- tm_shape(zion_elevation_clip) +
+tm_raster(col.legend = tm_legend(title = "Elevation (m)")) +
+tm_title(text = "Clipped")
+
+tmap_arrange(map1,map2, nrow = 1)
 
  
 ```
@@ -308,32 +317,69 @@ Plotting side-by-side, the clipped version appears to take up more space -- does
 
 
 ```{r}
-
+# Make sure extents are not the same since one is clipped!
+if(ext(zion_elevation) == ext(zion_elevation_clip)){
+print("extents match")
+} else{
+print("extents do not match") # This is what we want
+}
 
 ```
 
 :::
 
-In the previous example, we subsetted the extent of the raster (removed cells). Another common use of spatial subsetting is to select cells based on their values. In this case we create a "masking" raster comprised of logicals or NAs that dictates the cells we would like to preserve.
+In the previous example, we subsetted the extent of the raster (removed cells). Another common use of spatial subsetting is to select cells based on their values. In this case we create a **"masking" raster** comprised of logicals or NAs that dictates the cells we would like to preserve.
 
 ```{r}
+# Create raster mask of the same resolution and extent
+rmask <- zion_elevation
 
-     
+# Set all cells with elevation less than 2000 meters to NA
+rmask[rmask < 2000] <- NA
 
+# Subset elevation raster based on mask
+# Both are correct approaches, results are the same!
+
+# Approach 1: Bracket subsetting
+masked1 <- zion_elevation[rmask, drop = FALSE]
+
+# Approach 2: Mask() Function
+masked2 <- mask(zion_elevation, rmask)
 ```
 
+# Creating Plots!
 ```{r}
+map1 <- tm_shape(zion_elevation) +
+  tm_raster(col.legend = tm_legend(title = "Elevation (m)"))+
+  tm_title(text = "original")
+  #tm_layout(meta.margins = c(.2, 0, 0, 0))
 
+map2 <- tm_shape(masked1) +
+  tm_raster(col.legend = tm_legend(title = "Elevation (m)"))+
+  tm_title(text = "bracket subsetting") 
+  #tm_layout(meta.margins = c(.2, 0, 0, 0))
+
+map3 <- tm_shape(masked2) +
+  tm_raster(col.legend = tm_legend(title = "Elevation (m)"))+
+  tm_title(text = "mask()")
+  #tm_layout(meta.margins = c(.2, 0, 0, 0))
+
+tmap_arrange(map1, map2, map3, nrow = 1) 
 
 ```
 
 
 ## 4. Map algebra
 "Map algebra" is the set of operations that modify or summarize raster cell values with reference to surrounding cells, zones, or statistical functions that apply to every cell. Map algebra is typically categorized into local, focal, and zonal operations.
+- *"Raster is faster, vector is corrector"*
+- Each cell has a value
+- Can combine raster and vector together (1 lab)
 
 ### Local operations
 Local operations are computed on each cell individually. For example, we can use ordinary arithmetic or logical statements.
-
+- *Local* Cell-by-cell operations
+- *Focal* Aggregate neighboring cells
+- *Zonal* Aggregating based of 
 ```{r}
 
 
