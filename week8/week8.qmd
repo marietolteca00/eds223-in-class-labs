@@ -131,6 +131,7 @@ filelist <- list.files(here::here("week8","data", "landsat-data"), full.names = 
 # read in and store as a raster stack
 landsat <- rast(filelist)
 
+#small change
 
 
 ```
