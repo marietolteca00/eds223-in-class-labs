@@ -95,8 +95,8 @@ To train our classification algorithm and plot the results, we'll use the `rpart
 
 ```{r}
 #| eval: false
-install.packages("rpart")
-install.packages("rpart.plot")
+#install.packages("rpart")
+#install.packages("rpart.plot")
 ```
 
 
@@ -125,7 +125,8 @@ To create a raster stack, we will create a list of the files that we would like 
 ```{r}
 #| eval: false
 # list files for each band, including the full file path
-filelist <- list.files(here::here("data", "landsat-data"), full.names = TRUE)
+# here()
+filelist <- list.files(here::here("week8","data", "landsat-data"), full.names = TRUE)
 
 # read in and store as a raster stack
 landsat <- rast(filelist)
