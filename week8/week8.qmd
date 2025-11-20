@@ -261,7 +261,7 @@ To train our decision tree, we first need to establish our model formula (i.e. w
 
 
 ```{r include=TRUE}
-
+# establish model formula
 SB_formula <- type ~ red + green + blue + NIR + SWIR1 + SWIR2
 
 # Train decision tree
@@ -363,7 +363,7 @@ Unlike the decision tree, **k-means has no idea what "water" or "green vegetatio
 # Set SEED for reproducibility
 set.seed(223)
 
-# perform k means with. k = 4
+# perform k means with. k = 4 (groups)
 kmeans_result <- kmeans(spectral_data_scaled, centers = 4, nstart = 25)
 
 # Add cluster assignments to dataframe
@@ -386,7 +386,6 @@ values(SB_classification_kmeans) <- NA
 # Repopulate it -  Take the x,y coordinate from landsat_df and convert them to cell numbers for the raster
 cells <- cellFromXY(SB_classification_kmeans, landsat_df[, c("x", "y")])
 
-cells
 
 # Update cells with cluster value
 values(SB_classification_kmeans)[cells] <- landsat_df$cluster
@@ -420,6 +419,18 @@ landsat_df %>%
   arrange(cluster) %>% 
   knitr::kable(digits = 2,
                caption = "Mean spectral values by Cluster")
+# Cluster 3 = green vegetation - High NIR, low red
+# cluster 4 = blue -  water is higher than NIR
+# cluster 1 = soil/ dead grass - overall high reflectance, high numbers
+# cluster 2 = urban - 
+
+
+
+# Set category levels
+levels(SB_classification_kmeans) <- data.frame(
+  cluster = 1:4,
+  landcover = c("soil/ dead grass", "urban", "green vegetation", "water")
+)
 
 ```
 
@@ -428,8 +439,19 @@ landsat_df %>%
 Now we can plot the results and check out our land cover map!
 
 ```{r}
+# plot results
+kmeans_plot <- tm_shape(SB_classification_kmeans) +
+  tm_raster(
+    col.scale = tm_scale(
+      values = c("#F2DDA4","hotpink",  "#8DB580","#6A8EAE"),
+      labels = c("soil/dead grass", "urban", "green vegetation", "water")
+    ),
+    col.legend = tm_legend("Landcover type")
+  ) +
+  tm_title(text = "K- Means Landcover Classification") + 
+  tm_layout(legend.position = c("left", "bottom"))
 
-
+kmeans_plot
 
 ```
 
@@ -439,6 +461,6 @@ Now let's compare our two approaches side-by-side! The decision tree used labele
 
 
 ```{r}
-
+tmap_arrange(dt_plot,kmeans_plot, nrow =1)
 ```
 
